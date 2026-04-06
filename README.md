@@ -2,6 +2,8 @@
 
 Official PHP SDK for the Shoppex Developer API.
 
+This package is built for backend apps, admin tooling, and server-side integrations that talk to `/dev/v1/*`.
+
 ## Install
 
 ```bash
@@ -26,10 +28,25 @@ Use one of these:
 - `apiKey` for your own server-to-server integrations
 - `accessToken` for OAuth app installs
 
-## Status
+## Included Services
 
-This SDK is in early public MVP stage.
-The package is a good first integration base, but the service surface still needs to grow.
+- `me`
+- `products`
+- `orders`
+- `customers`
+- `payments`
+- `invoices`
+- `coupons`
+- `webhooks`
+
+This covers the main backend workflows:
+
+- product reads and writes
+- order creation, completion, fulfillment, and refunds
+- customer reads and writes
+- payment and invoice flows
+- coupon checks and CRUD
+- webhook management and delivery logs
 
 ## Docs
 
