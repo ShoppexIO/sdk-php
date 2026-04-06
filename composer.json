@@ -1,0 +1,32 @@
+{
+  "name": "shoppexio/shoppex-php",
+  "description": "Official PHP SDK for the Shoppex Developer API",
+  "type": "library",
+  "license": "MIT",
+  "homepage": "https://docs.shoppex.io/api-reference/sdks",
+  "support": {
+    "issues": "https://github.com/ShoppexIO/sdk-php/issues",
+    "source": "https://github.com/ShoppexIO/sdk-php"
+  },
+  "keywords": [
+    "shoppex",
+    "sdk",
+    "php",
+    "developer-api"
+  ],
+  "authors": [
+    {
+      "name": "Shoppex"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "Shoppex\\": "src/"
+    }
+  },
+  "require": {
+    "php": "^8.2",
+    "ext-curl": "*",
+    "ext-json": "*"
+  }
+}
