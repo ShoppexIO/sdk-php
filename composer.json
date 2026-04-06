@@ -24,9 +24,21 @@
       "Shoppex\\": "src/"
     }
   },
+  "autoload-dev": {
+    "psr-4": {
+      "Shoppex\\Tests\\": "tests/"
+    }
+  },
   "require": {
     "php": "^8.2",
     "ext-curl": "*",
     "ext-json": "*"
+  },
+  "require-dev": {
+    "phpstan/phpstan": "^2.1"
+  },
+  "scripts": {
+    "test": "php tests/client_test.php",
+    "analyse": "phpstan analyse src tests --level=max"
   }
 }

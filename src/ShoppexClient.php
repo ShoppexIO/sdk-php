@@ -10,6 +10,14 @@ final class ShoppexClient
     private string $token;
     /** @var callable|null */
     private $transport;
+    private ?MeService $meService = null;
+    private ?ProductsService $productsService = null;
+    private ?OrdersService $ordersService = null;
+    private ?CustomersService $customersService = null;
+    private ?PaymentsService $paymentsService = null;
+    private ?InvoicesService $invoicesService = null;
+    private ?CouponsService $couponsService = null;
+    private ?WebhooksService $webhooksService = null;
 
     public function __construct(
         ?string $apiKey = null,
@@ -29,42 +37,42 @@ final class ShoppexClient
 
     public function me(): MeService
     {
-        return new MeService($this);
+        return $this->meService ??= new MeService($this);
     }
 
     public function products(): ProductsService
     {
-        return new ProductsService($this);
+        return $this->productsService ??= new ProductsService($this);
     }
 
     public function orders(): OrdersService
     {
-        return new OrdersService($this);
+        return $this->ordersService ??= new OrdersService($this);
     }
 
     public function customers(): CustomersService
     {
-        return new CustomersService($this);
+        return $this->customersService ??= new CustomersService($this);
     }
 
     public function payments(): PaymentsService
     {
-        return new PaymentsService($this);
+        return $this->paymentsService ??= new PaymentsService($this);
     }
 
     public function invoices(): InvoicesService
     {
-        return new InvoicesService($this);
+        return $this->invoicesService ??= new InvoicesService($this);
     }
 
     public function coupons(): CouponsService
     {
-        return new CouponsService($this);
+        return $this->couponsService ??= new CouponsService($this);
     }
 
     public function webhooks(): WebhooksService
     {
-        return new WebhooksService($this);
+        return $this->webhooksService ??= new WebhooksService($this);
     }
 
     public function request(
@@ -84,21 +92,7 @@ final class ShoppexClient
                 $requestId = isset($headers['x-request-id']) && is_string($headers['x-request-id'])
                     ? $headers['x-request-id']
                     : null;
-
-                $message = 'Shoppex API request failed.';
-                $apiCode = null;
-                $docUrl = null;
-                $details = $payload;
-
-                if (is_array($payload) && isset($payload['error']) && is_array($payload['error'])) {
-                    $nested = $payload['error'];
-                    $message = isset($nested['message']) && is_string($nested['message']) ? $nested['message'] : $message;
-                    $apiCode = isset($nested['code']) && is_string($nested['code']) ? $nested['code'] : null;
-                    $docUrl = isset($nested['doc_url']) && is_string($nested['doc_url']) ? $nested['doc_url'] : null;
-                    $details = $nested['details'] ?? null;
-                }
-
-                throw new ApiError($message, $status, $requestId, $apiCode, $docUrl, $details, $payload);
+                $this->throwApiError($status, $requestId, $payload);
             }
 
             return is_array($payload) ? $payload : ['data' => $payload];
@@ -155,22 +149,7 @@ final class ShoppexClient
         }
 
         if ($status >= 400) {
-            $message = 'Shoppex API request failed.';
-            $apiCode = null;
-            $docUrl = null;
-            $details = $payload;
-
-            if (is_array($payload) && isset($payload['error']) && is_array($payload['error'])) {
-                $nested = $payload['error'];
-                $message = isset($nested['message']) && is_string($nested['message']) ? $nested['message'] : $message;
-                $apiCode = isset($nested['code']) && is_string($nested['code']) ? $nested['code'] : null;
-                $docUrl = isset($nested['doc_url']) && is_string($nested['doc_url']) ? $nested['doc_url'] : null;
-                $details = $nested['details'] ?? null;
-            } elseif (is_array($payload) && isset($payload['message']) && is_string($payload['message'])) {
-                $message = $payload['message'];
-            }
-
-            throw new ApiError($message, $status, $requestId, $apiCode, $docUrl, $details, $payload);
+            $this->throwApiError($status, $requestId, $payload);
         }
 
         return is_array($payload) ? $payload : ['data' => $payload];
@@ -291,5 +270,25 @@ final class ShoppexClient
     public function mapResource(mixed $value, string $resourceClass = Resource::class): mixed
     {
         return is_array($value) ? new $resourceClass($value) : $value;
+    }
+
+    private function throwApiError(int $status, ?string $requestId, mixed $payload): never
+    {
+        $message = 'Shoppex API request failed.';
+        $apiCode = null;
+        $docUrl = null;
+        $details = $payload;
+
+        if (is_array($payload) && isset($payload['error']) && is_array($payload['error'])) {
+            $nested = $payload['error'];
+            $message = isset($nested['message']) && is_string($nested['message']) ? $nested['message'] : $message;
+            $apiCode = isset($nested['code']) && is_string($nested['code']) ? $nested['code'] : null;
+            $docUrl = isset($nested['doc_url']) && is_string($nested['doc_url']) ? $nested['doc_url'] : null;
+            $details = $nested['details'] ?? null;
+        } elseif (is_array($payload) && isset($payload['message']) && is_string($payload['message'])) {
+            $message = $payload['message'];
+        }
+
+        throw new ApiError($message, $status, $requestId, $apiCode, $docUrl, $details, $payload);
     }
 }
